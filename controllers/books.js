@@ -1,92 +1,132 @@
-
+import { v4 } from 'uuid';
 
 let books = [
     {
         id: '1',
-        name: 'HarryPotter',
-        author: 'J.K.Rowling'
+        title: 'HarryPotter',
+        coverImage: 'https://d5i0fhmkm8zzl.cloudfront.net/book/9788176558808.jpg',
+        author: 'J.K.Rowling',
+        price: 19.99
+        
     },
     {
         id: '2',
-        name: 'SherlockHolmes',
-        author: 'Arthur Conan Doyle'
+        title: 'SherlockHolmes',
+        coverImage: 'https://m.media-amazon.com/images/I/91hJe52QzjL._SY522_.jpg',
+        author: 'Arthur Conan Doyle',
+        price: 14.99,
+        
     },
     {
         id: '3',
-        name: 'Atomic Habits',
-        author: 'James Clear'
+        title: 'Atomic Habits',
+        coverImage: 'https://m.media-amazon.com/images/I/91iJduVHk2L._SY522_.jpg',
+        author: 'James Clear',
+        price: 10.99,
+        
     },
     {
         id: '4',
-        name: 'The Canterville Ghost',
-        author: 'Oscar Wilde'
-    }
+        title: 'Eat Pray Love',
+        coverImage: 'https://images-eu.ssl-images-amazon.com/images/I/81EvR6P5-GL._AC_UL600_SR450,600_.jpg',
+        author: 'Elizabeth Gilbert',
+        price: 14.99,
+        
+    },
+      {
+        id: '5',
+        title: 'all that she can see',
+        coverImage: 'https://m.media-amazon.com/images/I/71+dsHCD7tL._SY522_.jpg',
+        author: 'Carrie Hope Fletcher',
+        price: 14.99,
+        
+    },
 ];
-
-
-const bookControllers = {
+function getBookById(id) {
+    return books.find(book => book.id === id);
+} 
+const booksControllers = {
     getBooks: (req, res) => {
-        res.status(200).json(books);
+        res.status(200).render('books', { books: books });
     },
-    getBook: (req, res) => {
-        const { id } = req.params;
-        const bookExist = getBooksById(id);
+ getBook: (req, res) => {
+    const { id } = req.params; // Capture the book's ID from the URL
+    const book = getBookById(id); // Retrieve the book using your function (e.g., getBookById)
 
-        if (bookExist) {
-            res.status(200).json(bookExist);
-        } else {
-            res.status(404).json({
-                message: `Book with id ${id} does not exist`
-            });
-        }
-    },
+    if (book) {
+        res.render('book', { book: book });
+    } else {
+        // Handle the case where the book with the given ID is not found
+        res.status(404).render('404', {
+            message: `Book with ID ${id} not found`,
+            title: '📚 Book Library'
+        });
+    }
+},
+
     postBook: (req, res) => {
-        const { name, author } = req.body;
+        const { title, author, price, coverImage, } = req.body;
         const newBook = {
-            id: String(books.length + 1),
-            name: name,
-            author: author
+            id: v4(),
+            title: title,
+            author: author,
+            price: price,
+            coverImage: coverImage,
+
         };
         books.push(newBook);
-        res.status(201).json(newBook);
+        res.status(201).redirect('/api/books'); // Redirect to the books list
     },
     putBook: (req, res) => {
         const { id } = req.params;
-        const bookExist = getBooksById(id);
+        const { title, author, price, coverImage, } = req.body;
+
+        const bookExist = getBookById(id);
 
         if (bookExist) {
-            const updatedBook = req.body;
-            books = books.map((book) => {
-                if (book.id === id) {
-                    return { ...book, ...updatedBook };
-                }
-                return book;
-            });
-            res.status(200).json({
-                message: `Book with id: ${id} updated`,
-                book: getBooksById(id)
-            });
+            const updatedBook = {
+                id,
+                title,
+                author,
+                price,
+                coverImage,
+            };
+            const bookToUpdate = books.find((book) => book.id === id);
+
+            if (bookToUpdate) {
+                bookToUpdate.id = updatedBook.id;
+                bookToUpdate.title = updatedBook.title;
+                bookToUpdate.author = updatedBook.author;
+                bookToUpdate.price = updatedBook.price;
+                bookToUpdate.coverImage = updatedBook.coverImage;
+                res.status(200).redirect('/api/books'); // Redirect to the books list
+            } else {
+                res.status(500).render('error', {
+                    message: `Failed to update book with id: ${id}`,
+                    title: '📚 Book Library',
+                });
+            }
         } else {
-            res.status(404).json({
-                message: `Book with id ${id} does not exist`
+            res.status(404).render('404', {
+                message: `Book with id ${id} does not exist`,
+                title: '📚 Book Library',
             });
         }
     },
     deleteBook: (req, res) => {
         const { id } = req.params;
-        const bookExist = getBooksById(id);
+        const bookExist = getBookById(id);
 
         if (bookExist) {
             books = books.filter((book) => book.id !== id);
-            res.status(200).json({
-                message: `Book with id: ${id} deleted`
-            });
+            res.status(200).redirect('/api/books'); // Redirect to the books list
         } else {
-            res.status(404).json({
-                message: `Book with id ${id} does not exist`
+            res.status(404).render('404', {
+                message: `Book with id ${id} does not exist`,
+                title: '📚 Book Library',
             });
         }
-    }
+    },
 };
 
-export default bookControllers;
+export default booksControllers;

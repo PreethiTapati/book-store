@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>Book-Library</title>
+</head>
+
+<body>
+    <h1>📚 Book Library</h1>
+    <div class="list-container">
+        <% books.forEach(book=> { %>
+            <div class="container book-card">
+                <h2 class="book-title">
+                    <%= book.title %>
+                </h2>
+                <img class="book-img" src="<%= book.coverImage %>" alt="<%= book.title %>">
+                <p class="author">Author: <%= book.author %>
+                </p>
+                <p class="price">Price: $<%= book.price %>
+                </p>
+            </div>
+            <% }); %>
+    </div>
+</body>
+
+</html>
